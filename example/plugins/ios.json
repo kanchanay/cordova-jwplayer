@@ -1,0 +1,19 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "com.sample.jwtest"
+        },
+        "cordova-jwplayer": {
+            "JWPLAYER_KEY_IOS": "Zc+UZW8cuCuo6jvdmsRRSoCcuhTZ+QrHsZoGnw==",
+            "PACKAGE_NAME": "com.sample.jwtest"
+        }
+    },
+    "dependent_plugins": {}
+}

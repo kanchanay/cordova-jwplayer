@@ -1,0 +1,20 @@
+{
+    "cordova-plugin-whitelist": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-whitelist@1"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-jwplayer": {
+        "source": {
+            "type": "local",
+            "path": "../../CordovaJWPlayer"
+        },
+        "is_top_level": true,
+        "variables": {
+            "JWPLAYER_KEY_IOS": "Zc+UZW8cuCuo6jvdmsRRSoCcuhTZ+QrHsZoGnw=="
+        }
+    }
+}
