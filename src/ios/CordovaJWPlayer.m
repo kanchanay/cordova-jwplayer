@@ -120,20 +120,24 @@
     for (NSDictionary *playItem  in plList) {
         JWConfig *plConfig = [JWConfig new];
         NSMutableArray *sources = [NSMutableArray new];
-        for(NSDictionary *source in playItem[@"sources"]) {
-            if(source[@"isDefault"] != NULL) {
-                [sources addObject:[JWSource
+        if(playItem[@"sources"]) {
+            for(NSDictionary *source in playItem[@"sources"]) {
+                if(source[@"isDefault"] != NULL) {
+                    [sources addObject:[JWSource
                                     sourceWithFile: source[@"file"]
                                     label: source[@"label"]
                                     isDefault:source[@"isDefault"]]];
-            } else {
-                [sources addObject:[JWSource
+                } else {
+                    [sources addObject:[JWSource
                                     sourceWithFile: source[@"file"]
                                     label: source[@"label"]]];
+                }
             }
+            
+            plConfig.sources = sources;
         }
         
-        plConfig.sources = sources;
+
         plConfig.title = playItem[@"title"];
         JWPlaylistItem *JWp = [JWPlaylistItem playlistItemWithConfig:(JWConfig *) plConfig];
         
@@ -144,7 +148,7 @@
             JWp.image = playItem[@"image"];
 
         if(playItem[@"file"])
-            JWp.image = playItem[@"file"];
+            JWp.file = playItem[@"file"];
         
         [pl addObject: JWp];
     }
