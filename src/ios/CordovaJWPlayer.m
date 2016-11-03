@@ -142,6 +142,9 @@
        
         if(playItem[@"image"])
             JWp.image = playItem[@"image"];
+
+        if(playItem[@"file"])
+            JWp.image = playItem[@"file"];
         
         [pl addObject: JWp];
     }
