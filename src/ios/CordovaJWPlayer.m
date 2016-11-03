@@ -63,9 +63,10 @@
 
 - (void)setup:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
+    
     NSDictionary *jsonOptions = [command.arguments objectAtIndex:0];
     NSLog(@" data %@", jsonOptions);
+    
     if (![jsonOptions isKindOfClass:[NSNull class]] && [jsonOptions count] > 0) {
         for (id key in jsonOptions) {
             if ([self.options objectForKey:key] != nil) {
@@ -73,30 +74,33 @@
             }
         }
     }
-    
     [self createPlayer];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    
 }
 
 - (void)setJWPlaylist:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
     NSArray *playList = [command.arguments objectAtIndex:0];
-    [self loadPlayList:playList];
+    [self initPlayList:playList];
+    
     [self.player loadPlaylist:self.playlist];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)play:(CDVInvokedUrlCommand*)command
 {
-    CDVPluginResult* pluginResult = nil;
     NSNumber *index = [command.arguments objectAtIndex:0];
     [self.player setPlaylistIndex:[index integerValue]];
     NSLog(@" data %ld", (long)[self.player playlistIndex]);
     
-    [self.viewController.view addSubview:self.player.view];
+    
+    if(![self.player.view isDescendantOfView:self.viewController.view]) {
+        [self.viewController.view addSubview:self.player.view];
+    }
     
     NSNumber * attendingObject = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     if(attendingObject) {
@@ -110,11 +114,11 @@
         self.player.view.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin|UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleWidth;
     }
 
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-- (void) loadPlayList: (NSArray *) plList
+- (void) initPlayList: (NSArray *) plList
 {
     NSMutableArray *pl = [NSMutableArray new];
     for (NSDictionary *playItem  in plList) {
@@ -122,7 +126,7 @@
         NSMutableArray *sources = [NSMutableArray new];
         if(playItem[@"sources"]) {
             for(NSDictionary *source in playItem[@"sources"]) {
-                if(source[@"isDefault"] != NULL) {
+                if(source[@"isDefault"]) {
                     [sources addObject:[JWSource
                                     sourceWithFile: source[@"file"]
                                     label: source[@"label"]
@@ -169,7 +173,10 @@
     
     NSLog(@" data %@", self.options[JWPOptionState.autostart]);
     
-    self.player = [[JWPlayerController alloc] initWithConfig:config];
+    if(!self.player) {
+        self.player = [[JWPlayerController alloc] initWithConfig:config];
+    }
+    
     self.player.delegate = self;
   
     self.player.forceFullScreenOnLandscape = [self.options[JWPOptionState.forceFullScreenOnLandscape] boolValue];
