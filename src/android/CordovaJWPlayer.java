@@ -1,4 +1,4 @@
-package cordova-jwplayer;
+package cordova_jwplayer;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
