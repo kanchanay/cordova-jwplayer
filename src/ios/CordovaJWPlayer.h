@@ -30,6 +30,9 @@
     @property (nonatomic, retain) NSString *listenerOnCompleteCallbackId;
     @property (nonatomic, retain) NSString *listenerOnBeforeCompleteCallbackId;
     @property (nonatomic, retain) NSString *listenerOnIdleCallbackId;
+    @property (nonatomic, retain) NSString *listenerOnFullscreenCallbackId;
+    @property (nonatomic, retain) NSArray *currentSupportedOrientation;
+
     extern const struct JWPOptionReadable
     {
         __unsafe_unretained NSString *forceFullScreenOnLandscape;

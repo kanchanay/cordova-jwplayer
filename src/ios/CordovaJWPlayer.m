@@ -54,6 +54,10 @@
             self.listenerOnIdleCallbackId = command.callbackId;
         }
         
+        if([event isEqual: @"onFullscreen"]) {
+            self.listenerOnFullscreenCallbackId = command.callbackId;
+        }
+        
     }
 
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -162,6 +166,7 @@
 
 - (void)createPlayer
 {
+    self.currentSupportedOrientation =  [self.viewController valueForKey:@"supportedOrientations"];//[[NSBundle mainBundle] objectForInfoDictionaryKey:@"UISupportedInterfaceOrientations"];
     JWConfig *config = [JWConfig new];
     config.image = self.options[JWPOptionState.image];
     config.title = self.options[JWPOptionState.title];
@@ -262,11 +267,27 @@
 - (void)onFullscreen:(BOOL)status
 {
     NSLog(@" data Onfullscreen%c", status);
-    NSNumber *attendingObject = [self.options objectForKey: JWPOptionState.onlyFullScreen];
+    NSNumber *onlyFullScreen = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     
-    if(attendingObject && status == NO) {
-        [self.player stop];
+    if(onlyFullScreen) {
+        if(status == NO) {
+            [self.player stop];
+            NSArray *orientations =  self.currentSupportedOrientation;
+            [self.viewController setValue:orientations forKey:@"supportedOrientations"];
+        } else {
+            NSArray *orientations = @[[NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft], [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]];
+            [self.viewController setValue:orientations forKey:@"supportedOrientations"];
+        }
     }
+    
+    NSLog(@" data Fullscreen");
+    if(self.listenerOnFullscreenCallbackId.length > 0) {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:status];
+        [pluginResult setKeepCallbackAsBool:true];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.listenerOnPauseCallbackId];
+    }
+    
+    
 }
 
 -(void)onBeforePlay
