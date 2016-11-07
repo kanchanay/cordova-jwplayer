@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 
-exports.setup = function(arg0, success, error) {
-    exec(success, error, "CordovaJWPlayer", "setup", [arg0]);
+exports.setup = function(config, playlist, success, error) {
+    exec(success, error, "CordovaJWPlayer", "setup", [config, playlist]);
 };
 
 exports.setPlaylist = function(playlist, success, error) {

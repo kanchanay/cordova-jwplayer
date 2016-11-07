@@ -69,6 +69,14 @@
 {
     
     NSDictionary *jsonOptions = [command.arguments objectAtIndex:0];
+    
+    NSArray *playList = [command.arguments objectAtIndex:1];
+    
+    if (![playList isKindOfClass:[NSNull class]] && [playList count] > 0) {
+        [self initPlayList:playList];
+    }
+    
+    
     NSLog(@" data %@", jsonOptions);
     
     if (![jsonOptions isKindOfClass:[NSNull class]] && [jsonOptions count] > 0) {
@@ -102,9 +110,9 @@
     NSLog(@" data %ld", (long)[self.player playlistIndex]);
     
     
-    if(![self.player.view isDescendantOfView:self.viewController.view]) {
+   // if(![self.player.view isDescendantOfView:self.viewController.view]) {
         [self.viewController.view addSubview:self.player.view];
-    }
+   // }
     
     NSNumber * attendingObject = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     if(attendingObject) {
@@ -134,7 +142,7 @@
                     [sources addObject:[JWSource
                                     sourceWithFile: source[@"file"]
                                     label: source[@"label"]
-                                    isDefault:source[@"isDefault"]]];
+                                    isDefault:(BOOL)source[@"isDefault"]]];
                 } else {
                     [sources addObject:[JWSource
                                     sourceWithFile: source[@"file"]
@@ -144,7 +152,6 @@
             
             plConfig.sources = sources;
         }
-        
 
         plConfig.title = playItem[@"title"];
         JWPlaylistItem *JWp = [JWPlaylistItem playlistItemWithConfig:(JWConfig *) plConfig];
@@ -178,6 +185,10 @@
     
     NSLog(@" data %@", self.options[JWPOptionState.autostart]);
     
+    if(self.playlist) {
+        config.playlist = self.playlist;
+    }
+    
     if(!self.player) {
         self.player = [[JWPlayerController alloc] initWithConfig:config];
     }
@@ -187,6 +198,7 @@
     self.player.forceFullScreenOnLandscape = [self.options[JWPOptionState.forceFullScreenOnLandscape] boolValue];
     self.player.forceLandscapeOnFullScreen = [self.options[JWPOptionState.forceLandscapeOnFullScreen] boolValue];
 }
+
 
 -(void)onTime:(double)position ofDuration:(double)duration
 {
@@ -270,13 +282,23 @@
     NSNumber *onlyFullScreen = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     
     if(onlyFullScreen) {
+        CDVViewController *presenter = (CDVViewController*)self.viewController;
         if(status == NO) {
+            NSArray *orientations =  @[[NSNumber numberWithInt:UIInterfaceOrientationMaskPortrait]];
+            [presenter setValue:orientations forKey:@"supportedOrientations"];
             [self.player stop];
-            NSArray *orientations =  self.currentSupportedOrientation;
-            [self.viewController setValue:orientations forKey:@"supportedOrientations"];
+
+            [self.player.view removeFromSuperview];
+            NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationMaskPortrait];
+            
+            [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+            
         } else {
-            NSArray *orientations = @[[NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft], [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]];
-            [self.viewController setValue:orientations forKey:@"supportedOrientations"];
+            NSArray *orientations = @[
+                                      [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft],
+                                      [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]
+                                    ];
+            [presenter setValue:orientations forKey:@"supportedOrientations"];
         }
     }
     
