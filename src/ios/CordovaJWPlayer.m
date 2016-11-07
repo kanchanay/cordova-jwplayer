@@ -284,7 +284,7 @@
     if(self.listenerOnFullscreenCallbackId.length > 0) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:status];
         [pluginResult setKeepCallbackAsBool:true];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.listenerOnPauseCallbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.listenerOnFullscreenCallbackId];
     }
     
     

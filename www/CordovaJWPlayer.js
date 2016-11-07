@@ -15,3 +15,7 @@ exports.play = function(index, success, error) {
 exports.onPlay = function(success) {
     exec(success, success, "CordovaJWPlayer", "bindAction", ["onPlay"]);
 };
+
+exports.onFullscreen = function(success) {
+    exec(success, success, "CordovaJWPlayer", "bindAction", ["onFullscreen"]);
+};
