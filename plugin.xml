@@ -14,6 +14,8 @@
         </config-file>
         <header-file src="src/ios/CordovaJWPlayer.h"/>
         <source-file src="src/ios/CordovaJWPlayer.m" />
+        <header-file src="src/ios/CordovaJWPlayerViewController.h"/>
+        <source-file src="src/ios/CordovaJWPlayerViewController.m" />
         <preference name="JWPLAYER_KEY_IOS" />
         <config-file target="*-Info.plist" parent="JWPlayerKey">
             <string>$JWPLAYER_KEY_IOS</string>

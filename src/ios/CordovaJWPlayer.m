@@ -1,12 +1,14 @@
 /********* CordovaJWPlayer.m Cordova Plugin Implementation *******/
 
 #import "CordovaJWPlayer.h"
+#import "YoikScreenOrientation.h"
+#import "CordovaJWPlayerViewController.h"
 
 @implementation CordovaJWPlayer
 
 - (void) pluginInitialize {
     self.defaultOptions = [[NSMutableDictionary alloc] init];
-    self.defaultOptions[JWPOptionState.forceFullScreenOnLandscape] = [NSNumber numberWithBool:YES];
+    self.defaultOptions[JWPOptionState.forceFullScreenOnLandscape] = [NSNumber numberWithBool:NO];
     self.defaultOptions[JWPOptionState.forceLandscapeOnFullScreen] = [NSNumber numberWithBool:YES];
     self.defaultOptions[JWPOptionState.onlyFullScreen]  = [NSNumber  numberWithBool:YES];
     self.defaultOptions[JWPOptionState.autostart]  = [NSNumber  numberWithBool:NO];
@@ -109,13 +111,32 @@
     [self.player setPlaylistIndex:[index integerValue]];
     NSLog(@" data %ld", (long)[self.player playlistIndex]);
     
+    NSNumber *onlyFullScreen = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     
-   // if(![self.player.view isDescendantOfView:self.viewController.view]) {
-        [self.viewController.view addSubview:self.player.view];
-   // }
+    if(onlyFullScreen) {
+        NSString *orientationIn = @"landscape";
+        CordovaPlayerViewController *vc = [[CordovaPlayerViewController alloc] init];
+        vc.calledWith = orientationIn;
+        
+        // backgound should be transparent as it is briefly visible
+        // prior to closing.
+        vc.view.backgroundColor = [UIColor clearColor];
+        // vc.view.alpha = 0.0;
+        vc.view.opaque = YES;
+        
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+        // This stops us getting the black application background flash, iOS8
+        vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+#endif
+        
+        [self.viewController presentViewController:vc animated:NO completion:nil];
+    }
     
-    NSNumber * attendingObject = [self.options objectForKey: JWPOptionState.onlyFullScreen];
-    if(attendingObject) {
+    
+    [self.viewController.view addSubview:self.player.view];
+    
+
+    if(onlyFullScreen) {
         [self.player enterFullScreen];
     } else {
         CGRect frame = self.viewController.view.bounds;
@@ -173,7 +194,9 @@
 
 - (void)createPlayer
 {
-    self.currentSupportedOrientation =  [self.viewController valueForKey:@"supportedOrientations"];//[[NSBundle mainBundle] objectForInfoDictionaryKey:@"UISupportedInterfaceOrientations"];
+    self.currentSupportedOrientation =  [self.viewController valueForKey:@"supportedOrientations"];
+    self.currentDeviceOrentation = (UIInterfaceOrientation)[[UIDevice currentDevice] valueForKey:@"orientation"];
+    
     JWConfig *config = [JWConfig new];
     config.image = self.options[JWPOptionState.image];
     config.title = self.options[JWPOptionState.title];
@@ -282,23 +305,22 @@
     NSNumber *onlyFullScreen = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     
     if(onlyFullScreen) {
-        CDVViewController *presenter = (CDVViewController*)self.viewController;
+        NSLog(@"Roation current%@", [[UIDevice currentDevice] valueForKey:@"orientation"]);
         if(status == NO) {
-            NSArray *orientations =  @[[NSNumber numberWithInt:UIInterfaceOrientationMaskPortrait]];
-            [presenter setValue:orientations forKey:@"supportedOrientations"];
-            [self.player stop];
-
             [self.player.view removeFromSuperview];
-            NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationMaskPortrait];
+            [self.player stop];
+ 
             
-            [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+            NSArray *orientations =  @[[NSNumber numberWithInt:1]];
+            [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
             
-        } else {
-            NSArray *orientations = @[
-                                      [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft],
-                                      [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]
-                                    ];
-            [presenter setValue:orientations forKey:@"supportedOrientations"];
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.2);
+            dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+
+                NSNumber *value = [NSNumber numberWithInt:1];
+                [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+                [self.viewController dismissViewControllerAnimated:YES completion:nil];
+            });
         }
     }
     
@@ -365,4 +387,31 @@
     [center addObserver:self selector:@selector(playerStateChanged:) name:JWAdActivityNotification object:nil];
 }
 
+@end
+
+@implementation CordovaPlayerViewController
+
+-(void) viewDidAppear:(BOOL)animated {
+    CDVViewController *presenter = (CDVViewController*)self.presentingViewController;
+    
+    if ([self.calledWith rangeOfString:@"portrait"].location != NSNotFound) {
+        [presenter updateSupportedOrientations:@[[NSNumber numberWithInt:UIInterfaceOrientationPortrait]]];
+        
+    } else if([self.calledWith rangeOfString:@"landscape"].location != NSNotFound) {
+        [presenter updateSupportedOrientations:@[[NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft]]];//, [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]
+    } else {
+        [presenter updateSupportedOrientations:@[[NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft], [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight], [NSNumber numberWithInt:UIInterfaceOrientationPortrait]]];
+    }
+    [presenter dismissViewControllerAnimated:NO completion:nil];
+}
+
+- (UIInterfaceOrientationMask) supportedInterfaceOrientations
+{
+    if ([self.calledWith rangeOfString:@"portrait"].location != NSNotFound) {
+        return UIInterfaceOrientationMaskPortrait;
+    } else if([self.calledWith rangeOfString:@"landscape"].location != NSNotFound) {
+        return UIInterfaceOrientationMaskLandscape;
+    }
+    return UIInterfaceOrientationMaskAll;
+}
 @end

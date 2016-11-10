@@ -32,6 +32,7 @@
     @property (nonatomic, retain) NSString *listenerOnIdleCallbackId;
     @property (nonatomic, retain) NSString *listenerOnFullscreenCallbackId;
     @property (nonatomic, retain) NSArray *currentSupportedOrientation;
+    @property (nonatomic, assign) UIInterfaceOrientation currentDeviceOrentation;
 
     extern const struct JWPOptionReadable
     {
@@ -46,6 +47,12 @@
     } JWPOptionState;
 
 - (void)play:(CDVInvokedUrlCommand*)command;
+@end
+
+@interface CordovaPlayerViewController : UIViewController
+
+@property (strong, nonatomic) NSString *calledWith;
+
 @end
 
 const struct JWPOptionReadable JWPOptionState =
