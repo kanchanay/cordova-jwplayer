@@ -188,7 +188,7 @@
         
         [pl addObject: JWp];
     }
-    
+
     self.playlist = pl;
 }
 
@@ -307,19 +307,18 @@
     if(onlyFullScreen) {
         NSLog(@"Roation current%@", [[UIDevice currentDevice] valueForKey:@"orientation"]);
         if(status == NO) {
-            [self.player.view removeFromSuperview];
             [self.player stop];
- 
+            [self.player.view removeFromSuperview];
+            [self.viewController dismissViewControllerAnimated:YES completion:nil];
             
             NSArray *orientations =  @[[NSNumber numberWithInt:1]];
             [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
+            [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:1] forKey:@"orientation"];
             
-            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.2);
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.5);
             dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-
-                NSNumber *value = [NSNumber numberWithInt:1];
-                [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
-                [self.viewController dismissViewControllerAnimated:YES completion:nil];
+                [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
+                [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:1] forKey:@"orientation"];
             });
         }
     }
