@@ -88,7 +88,7 @@
             }
         }
     }
-    [self createPlayer];
+    [self createPlayer:NO];
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -113,33 +113,29 @@
     
     NSNumber *onlyFullScreen = [self.options objectForKey: JWPOptionState.onlyFullScreen];
     
-//    if(onlyFullScreen) {
-//        NSString *orientationIn = @"landscape";
-//        CordovaPlayerViewController *vc = [[CordovaPlayerViewController alloc] init];
-//        vc.calledWith = orientationIn;
-//        
-//        // backgound should be transparent as it is briefly visible
-//        // prior to closing.
-//        vc.view.backgroundColor = [UIColor clearColor];
-//        // vc.view.alpha = 0.0;
-//        vc.view.opaque = YES;
-//        
-//#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
-//        // This stops us getting the black application background flash, iOS8
-//        vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
-//#endif
-//        
-//        //[vc.view addSubview:self.player.view];
-//        [self.viewController presentViewController:vc animated:NO completion:nil];
-//       // [self.viewController.presentedViewController.view addSubview:self.player.view];
-//        
-//        [self.player.view setHidden:NO];
-//    } else {
-//        [self.viewController.view addSubview:self.player.view];
-//    }
- 
-    [self.player.view setHidden:NO];
+    if(onlyFullScreen) {
+        NSString *orientationIn = @"landscape";
+        CordovaPlayerViewController *vc = [[CordovaPlayerViewController alloc] init];
+        vc.calledWith = orientationIn;
+        
+        // backgound should be transparent as it is briefly visible
+        // prior to closing.
+        vc.view.backgroundColor = [UIColor clearColor];
+        // vc.view.alpha = 0.0;
+        vc.view.opaque = YES;
+        
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+        // This stops us getting the black application background flash, iOS8
+        vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+#endif
+        
+        [self.viewController presentViewController:vc animated:NO completion:nil];
+    }
     
+    
+    [self.viewController.view addSubview:self.player.view];
+    
+
     if(onlyFullScreen) {
         [self.player enterFullScreen];
     } else {
@@ -192,12 +188,13 @@
         
         [pl addObject: JWp];
     }
-
+    
     self.playlist = pl;
 }
 
-- (void)createPlayer
+- (void)createPlayer: (BOOL)override
 {
+    //Do background work
     self.currentSupportedOrientation =  [self.viewController valueForKey:@"supportedOrientations"];
     self.currentDeviceOrentation = (UIInterfaceOrientation)[[UIDevice currentDevice] valueForKey:@"orientation"];
     
@@ -216,14 +213,30 @@
         config.playlist = self.playlist;
     }
     
-    if(!self.player) {
+    UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc]initWithFrame:CGRectMake(135,140,50,50)];
+    spinner.hidesWhenStopped = YES;
+    
+    if(override) {
+        [spinner startAnimating];
+        [self.viewController.view addSubview:spinner];
+
+    }
+    
+    if(!self.player ||  override) {
         self.player = [[JWPlayerController alloc] initWithConfig:config];
     }
     
+
+    
     self.player.delegate = self;
-  
+    
     self.player.forceFullScreenOnLandscape = [self.options[JWPOptionState.forceFullScreenOnLandscape] boolValue];
     self.player.forceLandscapeOnFullScreen = [self.options[JWPOptionState.forceLandscapeOnFullScreen] boolValue];
+    
+    if(override) {
+        [spinner stopAnimating];
+        [spinner removeFromSuperview];
+    }
 }
 
 
@@ -311,32 +324,39 @@
     if(onlyFullScreen) {
         NSLog(@"Roation current%@", [[UIDevice currentDevice] valueForKey:@"orientation"]);
         if(status == NO) {
+            [self.player.view removeFromSuperview];
             [self.player stop];
-            [self.player.view setHidden:YES];
+ 
+            self.player = nil;
+            [self createPlayer:YES];
+            
             NSArray *orientations =  @[[NSNumber numberWithInt:1]];
             [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
             
-            dispatch_time_t delay1 = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.5);
-            dispatch_after(delay1, dispatch_get_main_queue(), ^(void){
-                [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:1] forKey:@"orientation"];
+            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.2);
+            dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+
+                NSNumber *value = [NSNumber numberWithInt:1];
+                [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+                [self.viewController dismissViewControllerAnimated:YES completion:nil];
             });
             
-            dispatch_time_t delay2 = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 1);
-            dispatch_after(delay2, dispatch_get_main_queue(), ^(void){
-                [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:1] forKey:@"orientation"];
-            });
+            NSString *orientationIn = @"portrait";
+            CordovaPlayerViewController *vc = [[CordovaPlayerViewController alloc] init];
+            vc.calledWith = orientationIn;
             
-           
-//            [self.viewController.presentedViewController dismissViewControllerAnimated:NO completion:nil];
-//            
-//            NSArray *orientations =  @[[NSNumber numberWithInt:0]];
-//            [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
-//            [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:0] forKey:@"orientation"];
+            // backgound should be transparent as it is briefly visible
+            // prior to closing.
+            vc.view.backgroundColor = [UIColor clearColor];
+            // vc.view.alpha = 0.0;
+            vc.view.opaque = YES;
             
-//            dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.2);
-//            dispatch_after(delay, dispatch_get_main_queue(), ^(void){
-//                
-//            });
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+            // This stops us getting the black application background flash, iOS8
+            vc.modalPresentationStyle = UIModalPresentationOverFullScreen;
+#endif
+            
+            [self.viewController presentViewController:vc animated:NO completion:nil];
         }
     }
     
@@ -349,17 +369,6 @@
     
     
 }
-
-//-(void) onDisplayClick
-//{
-//    [self.player stop];
-//    [self.player.view removeFromSuperview];
-//    [self.viewController.presentedViewController dismissViewControllerAnimated:YES completion:nil];
-//    
-//    NSArray *orientations =  @[[NSNumber numberWithInt:0]];
-//    [(CDVViewController*)self.viewController setValue:orientations forKey:@"supportedOrientations"];
-//    [[UIDevice currentDevice] setValue:[NSNumber numberWithInt:0] forKey:@"orientation"];
-//}
 
 -(void)onBeforePlay
 {
@@ -423,7 +432,7 @@
     
     if ([self.calledWith rangeOfString:@"portrait"].location != NSNotFound) {
         [presenter updateSupportedOrientations:@[[NSNumber numberWithInt:UIInterfaceOrientationPortrait]]];
-        
+        [presenter.webView setFrame:presenter.view.frame];
     } else if([self.calledWith rangeOfString:@"landscape"].location != NSNotFound) {
         [presenter updateSupportedOrientations:@[[NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft]]];//, [NSNumber numberWithInt:UIInterfaceOrientationLandscapeRight]
     } else {
