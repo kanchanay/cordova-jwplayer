@@ -25,10 +25,21 @@
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="CordovaJWPlayer">
-                <param name="android-package" value="cordova-jwplayer.CordovaJWPlayer" />
+                <param name="android-package" value="cordovajwplayer.CordovaJWPlayer" />
             </feature>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/CordovaJWPlayer.java" target-dir="src/cordova-jwplayer/CordovaJWPlayer" />
+        
+        <preference name="JW_LICENSE_KEY" />
+        <source-file src="src/android/jwplayerconfig.xml" target-dir="res/values" />
+        <config-file target="res/values/jwplayerconfig.xml" parent="/*">
+            <string name="JW_LICENSE_KEY">$JW_LICENSE_KEY</string>
+        </config-file>
+        <config-file parent="/*/application" target="AndroidManifest.xml" >
+            <meta-data android:name="JW_LICENSE_KEY" android:value="@string/JW_LICENSE_KEY" />
+        </config-file>
+        
+        <source-file src="src/android/CordovaJWPlayer.java" target-dir="src/cordovajwplayer/CordovaJWPlayer" />
+        <framework src="src/android/CordovaJWPlayer.gradle" custom="true" type="gradleReference"/>
+        <resource-file src="src/android/jwplayer-android-sdk-2.5.3+164.aar" target="libs/jwplayer-android-sdk-2.5.3+164.aar" />
     </platform>
 </plugin>
