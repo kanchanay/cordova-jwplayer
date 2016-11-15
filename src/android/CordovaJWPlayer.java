@@ -96,7 +96,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
     }
 
     private void setPlaylist(JSONArray playlist) throws JSONException {
-		int lengthPl = playlist.length();
+		mPlayList.clear();
 		for(int i=0; i < playlist.length(); i++) {
 			PlaylistItem pl = new PlaylistItem();
 			List<MediaSource> mediaSources = new ArrayList<MediaSource>();
