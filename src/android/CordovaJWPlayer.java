@@ -17,9 +17,10 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.longtailvideo.jwplayer.JWPlayerView;
-
 import com.longtailvideo.jwplayer.media.playlists.MediaSource;
 import com.longtailvideo.jwplayer.events.listeners.VideoPlayerEvents;
 import com.longtailvideo.jwplayer.media.playlists.PlaylistItem;
@@ -95,6 +96,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
     }
 
     private void setPlaylist(JSONArray playlist) throws JSONException {
+		int lengthPl = playlist.length();
 		for(int i=0; i < playlist.length(); i++) {
 			PlaylistItem pl = new PlaylistItem();
 			List<MediaSource> mediaSources = new ArrayList<MediaSource>();
@@ -107,7 +109,9 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 					MediaSource ms = new MediaSource();
 
 					ms.setFile(source.getString("file"));
-					ms.setLabel(source.getString("label"));
+					if(source.has("label")) {
+						ms.setLabel(source.getString("label"));
+					}
 					if(source.has("isDefault")) {
 						ms.setDefault(source.getBoolean("isDefault"));
 					}
@@ -151,7 +155,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 
 
 				//AdvertisingBase advertising;
-				hideSystemUI();
+				//hideSystemUI();
 
 				// Enter portrait mode
 				mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -161,10 +165,10 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 
 				// Destroy the surface that is used for video output, we need to do this before
 				// we can detach the JWPlayerView from a ViewGroup.
-				//dPlayerView.destroySurface();
+                mPlayerView.destroySurface();
 
 				// Remove the player view from the root ViewGroup.
-				//mRootView.removeView(mPlayerView);
+				mRootView.removeView(mPlayerView);
 
 				// After we've detached the JWPlayerView we can safely reinitialize the surface.
 				//dPlayerView.initializeSurface();
@@ -199,6 +203,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 								| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 								| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 			}});
+
     }
 
     /**
@@ -225,8 +230,6 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 	/**
 	 * Regular playback events below here
 	 */
-
-	@Override
 	public void onFullscreen(boolean fullscreen) {
 		final boolean fScreen = fullscreen;
 		cordova.getActivity().runOnUiThread(new Runnable() {
@@ -234,7 +237,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 				updateOutput("onFullscreen(" + fScreen + ")");
 				if (!fScreen) {
 					mPlayerView.stop();
-					showSystemUI();
+					//showSystemUI();
 
 					// Enter portrait mode
 					mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
