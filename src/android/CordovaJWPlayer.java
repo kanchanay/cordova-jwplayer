@@ -151,6 +151,8 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 				mDecorView = cordova.getActivity().getWindow().getDecorView();
 				mPlayerView = new JWPlayerView(mActivity, new PlayerConfig.Builder().build());
 
+				mPlayerView.setFullscreenHandler(new PlayerFullscreenHandler());
+
 				List<PlaylistItem> pl = new ArrayList<PlaylistItem>();
 
 
@@ -158,7 +160,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 				//hideSystemUI();
 
 				// Enter portrait mode
-				mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
 				mPlayerView.addOnFullscreenListener(cwp);
 
@@ -244,11 +246,14 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 
 					// Remove the player view from the root ViewGroup.
 					mRootView.removeView(mPlayerView);
+				} else {
+					mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 				}
 			}
 		});
 	}
-//
+
+//  TODO Implement events fr Pause and Play
 //	public void onPause(PlayerState oldState) {
 //		updateOutput("onPause(" + oldState + ")");
 //	}
@@ -257,4 +262,49 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 //		updateOutput("onPlay(" + oldState + ")");
 //	}
 
+	private class PlayerFullscreenHandler implements FullscreenHandler {
+
+		public PlayerFullscreenHandler() {
+		}
+
+		@Override
+		public void onFullscreenRequested() {
+			mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		}
+
+		@Override
+		public void onFullscreenExitRequested() {
+			mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		}
+
+		@Override
+		public void onResume() {
+
+		}
+
+		@Override
+		public void onPause() {
+
+		}
+
+		@Override
+		public void onDestroy() {
+
+		}
+
+		@Override
+		public void onAllowRotationChanged(boolean allowRotation) {
+
+		}
+
+		@Override
+		public void updateLayoutParams(ViewGroup.LayoutParams layoutParams) {
+
+		}
+
+		@Override
+		public void setUseFullscreenLayoutFlags(boolean useFlags) {
+
+		}
+	}
 }
