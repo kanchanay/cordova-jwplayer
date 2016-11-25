@@ -204,7 +204,7 @@
     
     config.controls = [self.options[JWPOptionState.controls] boolValue];
     config.repeat =  [self.options[JWPOptionState.repeat] boolValue];
-    config.premiumSkin = JWPremiumSkinRoundster;
+    config.premiumSkin = JWPremiumSkinGlow;
     config.autostart = [self.options[JWPOptionState.autostart] boolValue];
     
     NSLog(@" data %@", self.options[JWPOptionState.autostart]);

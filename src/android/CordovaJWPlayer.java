@@ -176,7 +176,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 				//dPlayerView.initializeSurface();
 
 				// Restore the listview-skin
-				mPlayerView.setSkin(Skin.BEELDEN);
+				mPlayerView.setSkin(Skin.GLOW);
 				mPlayerView.initializeSurface();
 				mPlayerView.load(mPlayList);
 				mPlayerView.playlistItem(playIndex);
