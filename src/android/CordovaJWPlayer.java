@@ -78,6 +78,7 @@ public class CordovaJWPlayer extends CordovaPlugin implements   VideoPlayerEvent
 		if(ACTION_SET_PLAYLIST.equals(action)) {
 			JSONArray playlist = null;
 			playlist = args.getJSONArray(0);
+			callbackContext.success();
 		}
 
         return false;
