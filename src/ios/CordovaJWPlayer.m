@@ -3,6 +3,8 @@
 #import "CordovaJWPlayer.h"
 #import "YoikScreenOrientation.h"
 #import "CordovaJWPlayerViewController.h"
+#import <AVFoundation/AVFoundation.h>
+#import <AudioToolbox/AudioToolbox.h>
 
 @implementation CordovaJWPlayer
 
@@ -17,6 +19,11 @@
     self.defaultOptions[JWPOptionState.image]  = [NSString  stringWithFormat:@""];
     self.defaultOptions[JWPOptionState.title]  = [NSString  stringWithFormat:@""];
     self.options = self.defaultOptions;
+
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    BOOL ok;
+    NSError *setCategoryError = nil;
+    ok = [audioSession setCategory:AVAudioSessionCategoryPlayback error:&setCategoryError];
 }
 
 
